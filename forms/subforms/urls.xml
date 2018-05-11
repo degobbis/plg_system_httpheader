@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+	<field
+		name="url"
+		type="text"
+		class="span11"
+		label="PLG_SYSTEM_HTTPHEADER_SUBFORM_URLS_URL"
+	/>
+</form>

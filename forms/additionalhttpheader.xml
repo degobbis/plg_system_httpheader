@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<field
+			name="additional_httpheader_note"
+			type="note"
+			class="alert alert-info"
+			description="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY_NOTE"
+	/>
+	<field
+			name="additional_httpheader"
+			type="radio"
+			class="btn-group btn-group-yesno"
+			label="PLG_SYSTEM_HTTPHEADER_HSTS"
+			description="PLG_SYSTEM_HTTPHEADER_HSTS_DESC"
+			default="0"
+	>
+		<option value="1">JENABLED</option>
+		<option value="0">JDISABLED</option>
+	</field>
+	<field
+			name="additional_httpheader_values"
+			type="subform"
+			label="PLG_SYSTEM_HTTPHEADER_ADDITIONAL_HEADER"
+			description="PLG_SYSTEM_HTTPHEADER_ADDITIONAL_HEADER_DESC"
+			formsource="plugins/system/httpheader/forms/subforms/keyvalue.xml"
+			multiple="true"
+			min="1"
+			schowon="additional_httpheader:1"
+	/>
+</form>

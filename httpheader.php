@@ -8,12 +8,16 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Plugin\CMSPlugin;
+
+JFormHelper::addFormPath(JPATH_PLUGINS . '/system/httpheader/forms');
+
 /**
  * Plugin class for Http Header
  *
  * @since  1.0
  */
-class PlgSystemHttpHeader extends JPlugin
+class PlgSystemHttpHeader extends CMSPlugin
 {
 	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
@@ -21,7 +25,7 @@ class PlgSystemHttpHeader extends JPlugin
 	 * @var    boolean
 	 * @since  1.0
 	 */
-	 protected $autoloadLanguage = true;
+	protected $autoloadLanguage = true;
 
 	/**
 	 * Application object.
@@ -38,9 +42,6 @@ class PlgSystemHttpHeader extends JPlugin
 	 * @since  1.0
 	 */
 	protected $supportedHttpHeaders = array(
-		'Strict-Transport-Security',
-		'Content-Security-Policy',
-		'Content-Security-Policy-Report-Only',
 		'X-Frame-Options',
 		'X-XSS-Protection',
 		'X-Content-Type-Options',
@@ -48,6 +49,96 @@ class PlgSystemHttpHeader extends JPlugin
 		// Upcoming Header
 		'Expect-CT',
 	);
+
+	/**
+	 * Listener for the `onContentPrepareForm` event
+	 *
+	 * @param   JForm $form The form to be altered.
+	 * @param   array $data The associated data for the form
+	 *
+	 * @return   void
+	 * @since    1.0
+	 */
+	public function onContentPrepareForm($form, $data)
+	{
+		/*
+		if ($form->getName() == 'com_menus.item')
+		{
+			$this->loadLanguage('Plg_system_httpheader');
+			if ($this->app->getUserState('plugins.system.httpheaders.global') === null)
+			{
+				$this->setGlobals();
+			}
+			$form->addFormPath(JPATH_PLUGINS . '/system/httpheader/forms');
+
+			$form->setField(new SimpleXMLElement('<fieldset name="httpheader"></fieldset>'));
+			$form->setField(
+				new SimpleXMLElement(
+					'<field name="default_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/httpheader.xml"/>'
+				),
+			 null, true, 'httpheader');
+			$form->setField(
+				new SimpleXMLElement(
+					'<field name="hsts_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/hsts.xml"/>'
+				),
+			 null, true, 'httpheader');
+		}
+		*/
+
+		if ($form->getName() == 'com_plugins.plugin' && !empty($data))
+		{
+			if ($this->_name != $data->get('element', null))
+			{
+				return;
+			}
+			$test = $this->app->getUserState('plugins.system.httpheaders.global');
+		}
+	}
+
+	public function onContentPrepareData($form, $data)
+	{
+		if ($form == 'com_plugins.plugin')
+		{
+			if ((string) $data->name == 'plg_system_httpheader')
+			{
+				$this->app->setUserState('plugins.system.httpheaders.global', null);
+
+				if (!empty($data->params))
+				{
+					$params = new JRegistry($data->params);
+					$params = $params->toObject();
+					$this->setGlobals($params);
+				}
+				else
+				{
+					$this->setGlobals();
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * @todo Description
+	 *
+	 * @param   object  $data
+	 *
+	 * @return   void
+	 * @since    1.0
+	 */
+	private function setGlobals($data = null)
+	{
+		if ($data === null)
+		{
+			$data = $this->params->toObject();
+		}
+
+		foreach ($data as $key => $values)
+		{
+			$form = stristr($key,'_', true);
+			$this->app->setUserState('plugins.system.httpheaders.global.' . $form, $values);
+		}
+	}
 
 	/**
 	 * Listener for the `onAfterInitialise` event
@@ -105,7 +196,7 @@ class PlgSystemHttpHeader extends JPlugin
 	{
 		$maxAge        = (int) $this->params->get('hsts_maxage', 300);
 		$hstsOptions   = array();
-		$hstsOptions[] = $maxAge < 300 ? 'max-age: 300' : 'max-age: ' . $maxAge;
+		$hstsOptions[] = $maxAge <= 300 ? 'max-age: 10' : 'max-age: ' . $maxAge;
 
 		if ($this->params->get('hsts_subdomains', 0))
 		{
@@ -117,7 +208,7 @@ class PlgSystemHttpHeader extends JPlugin
 			$hstsOptions[] = 'preload';
 		}
 
-		$this->app->setHeader('', implode('; ', $hstsOptions));
+		$this->app->setHeader('Strict-Transport-Security', implode('; ', $hstsOptions));
 	}
 
 	/**

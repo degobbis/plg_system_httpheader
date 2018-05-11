@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<field
+			name="contentsecuritypolicy_note"
+			type="note"
+			class="alert alert-info"
+			description="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY_NOTE"
+	/>
+	<field
+			name="contentsecuritypolicy"
+			type="radio"
+			class="btn-group btn-group-yesno"
+			label="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY"
+			description="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY_DESC"
+			default="0"
+	>
+		<option value="1">JENABLED</option>
+		<option value="0">JDISABLED</option>
+	</field>
+	<field
+			name="contentsecuritypolicy_report_only"
+			type="radio"
+			class="btn-group btn-group-yesno"
+			label="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY_REPORT_ONLY"
+			description="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY_REPORT_ONLY_DESC"
+			default="0"
+			showon="contentsecuritypolicy:1"
+	>
+		<option value="1">JENABLED</option>
+		<option value="0">JDISABLED</option>
+	</field>
+	<field
+			name="contentsecuritypolicy_values"
+			type="subform"
+			label="PLG_SYSTEM_HTTPHEADER_CONTENTSECURITYPOLICY_VALUES"
+			formsource="plugins/system/httpheader/forms/subforms/cspkeyvalue.xml"
+			multiple="true"
+			min="1"
+			showon="contentsecuritypolicy:1"
+	/>
+</form>

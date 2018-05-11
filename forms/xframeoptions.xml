@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<field
+			name="xframeoptions_note"
+			type="note"
+			class="alert alert-info"
+			description="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_NOTE_DESC"
+	/>
+	<field
+			name="xframeoptions"
+			type="list"
+			class="chzn-color-state"
+			label="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS"
+			description="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_DESC"
+			default="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_SAMEORIGIN"
+	>
+		<option value="0">JDISABLED</option>
+		<option value="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_DENY">PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_DENY</option>
+		<option value="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_SAMEORIGIN">PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_SAMEORIGIN</option>
+		<option value="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_ALLOWFROM">PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_ALLOWFROM</option>
+	</field>
+	<field
+			name="xframeoptions_allowfrom"
+			type="subform"
+			label="PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_ALLOWFROM"
+			description=""
+			formsource="/plugins/system/httpheader/forms/subforms/urls.xml"
+			multiple="true"
+			min="1"
+			showon="xframeoptions:PLG_SYSTEM_HTTPHEADER_XFRAMEOPTIONS_OPTION_ALLOWFROM"
+	/>
+</form>

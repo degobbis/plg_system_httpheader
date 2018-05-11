@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<field
+			name="xxsprotection_note"
+			type="note"
+			class="alert alert-info"
+			description="PLG_SYSTEM_HTTPHEADER_XXSPROTECTION_NOTE_DESC"
+	/>
+	<field
+			name="xxsprotection"
+			type="radio"
+			class="btn-group btn-group-yesno"
+			label="PLG_SYSTEM_HTTPHEADER_XXSPROTECTION"
+			description="PLG_SYSTEM_HTTPHEADER_XXSPROTECTION_DESC"
+			default="1"
+	>
+		<option value="1">JENABLED</option>
+		<option value="0">JDISABLED</option>
+	</field>
+	<field
+			name="xxsprotection_block"
+			type="radio"
+			class="btn-group btn-group-yesno"
+			label="PLG_SYSTEM_HTTPHEADER_XXSPROTECTION_BLOCK"
+			description="PLG_SYSTEM_HTTPHEADER_XXSPROTECTION_BLOCK_DESC"
+			default="1"
+			showon="xxsprotection:1"
+	>
+		<option value="1">JENABLED</option>
+		<option value="0">JDISABLED</option>
+	</field>
+</form>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<field
+			name="xcontenttypeoptions_note"
+			type="note"
+			class="alert alert-info"
+			description="PLG_SYSTEM_HTTPHEADER_XCONTENTTYPEOPTIONS_NOTE_DESC"
+	/>
+	<field
+			name="xcontenttypeoptions"
+			type="radio"
+			class="btn-group btn-group-yesno"
+			label="PLG_SYSTEM_HTTPHEADER_XCONTENTTYPEOPTIONS"
+			description="PLG_SYSTEM_HTTPHEADER_XCONTENTTYPEOPTIONS_DESC"
+			default="1"
+	>
+		<option value="1">JENABLED</option>
+		<option value="0">JDISABLED</option>
+	</field>
+</form>
