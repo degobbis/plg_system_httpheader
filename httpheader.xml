@@ -21,6 +21,26 @@
 	</updateservers>
 	<config>
 		<fields name="params">
+			<fieldset name="basic">
+				<field
+						name="save_note_handler"
+						type="hidden"
+						default="1"
+				/>
+				<field
+						name="save_note"
+						type="note"
+						class="alert alert-error"
+						description="PLG_SYSTEM_HTTPHEADER_SAVE_NOTE"
+						showon="save_note_handler:1"
+				/>
+				<field
+						name="intro_note"
+						type="note"
+						class="alert alert-success"
+						description="PLG_SYSTEM_HTTPHEADER_INTRO_NOTE"
+				/>
+			</fieldset>
 			<fieldset name="xcontenttypeoptions_subform">
 				<field
 						name="xcontenttypeoptions_subform"
@@ -45,12 +65,12 @@
 						formsource="/plugins/system/httpheader/forms/referrerpolicy.xml"
 				/>
 			</fieldset>
-			<fieldset name="xss_subform">
+			<fieldset name="xxssprotection_subform">
 				<field
-						name="xss_subform"
+						name="xxssprotection_subform"
 						type="subform"
 						label=""
-						formsource="/plugins/system/httpheader/forms/xss.xml"
+						formsource="/plugins/system/httpheader/forms/xxssprotection.xml"
 				/>
 			</fieldset>
 			<fieldset name="hsts_subform">
@@ -75,14 +95,6 @@
 						type="subform"
 						label=""
 						formsource="/plugins/system/httpheader/forms/additionalhttpheader.xml"
-				/>
-			</fieldset>
-			<fieldset name="basic">
-				<field
-						name="intro_note"
-						type="note"
-						class="alert alert-success"
-						description="PLG_SYSTEM_HTTPHEADER_INTRO_NOTE"
 				/>
 			</fieldset>
 		</fields>

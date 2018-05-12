@@ -8,14 +8,18 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\Form\FormHelper;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Utilities\ArrayHelper;
 
-JFormHelper::addFormPath(JPATH_PLUGINS . '/system/httpheader/forms');
+FormHelper::addFormPath(JPATH_PLUGINS . '/system/httpheader/forms');
 
 /**
  * Plugin class for Http Header
  *
- * @since  1.0
+ * @since   1.0
  */
 class PlgSystemHttpHeader extends CMSPlugin
 {
@@ -23,15 +27,26 @@ class PlgSystemHttpHeader extends CMSPlugin
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
 	 *
 	 * @var    boolean
-	 * @since  1.0
+	 *
+	 * @since   1.0
 	 */
 	protected $autoloadLanguage = true;
+
+	/**
+	 * Extension Id.
+	 *
+	 * @var    int
+	 *
+	 * @since   1.0
+	 */
+	protected $id;
 
 	/**
 	 * Application object.
 	 *
 	 * @var    JApplicationCms
-	 * @since  1.0
+	 *
+	 * @since   1.0
 	 */
 	protected $app;
 
@@ -39,148 +54,234 @@ class PlgSystemHttpHeader extends CMSPlugin
 	 * The list of the suported HTTP headers
 	 *
 	 * @var    array
-	 * @since  1.0
+	 *
+	 * @since   1.0
 	 */
 	protected $supportedHttpHeaders = array(
-		'X-Frame-Options',
-		'X-XSS-Protection',
-		'X-Content-Type-Options',
-		'Referrer-Policy',
 		// Upcoming Header
 		'Expect-CT',
 	);
 
 	/**
-	 * Listener for the `onContentPrepareForm` event
+	 * Constructor
 	 *
-	 * @param   JForm $form The form to be altered.
-	 * @param   array $data The associated data for the form
+	 * @param   object  &$subject  The object to observe
+	 * @param   array   $config    An optional associative array of configuration settings.
+	 *                             Recognized key values include 'name', 'group', 'params', 'language'
+	 *                             (this list is not meant to be comprehensive).
 	 *
 	 * @return   void
-	 * @since    1.0
+	 *
+	 * @since   1.5
+	 */
+	public function __construct(&$subject, $config = array())
+	{
+		if (empty($this->id))
+		{
+			$this->id = (int) $config['id'];
+		}
+
+		parent::__construct($subject, $config);
+	}
+
+	/**
+	 * Listener for the `onContentPrepareForm` event
+	 *
+	 * @param   JForm  $form  The form to be altered.
+	 * @param   array  $data  The associated data for the form
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
 	 */
 	public function onContentPrepareForm($form, $data)
 	{
-		/*
 		if ($form->getName() == 'com_menus.item')
 		{
-			$this->loadLanguage('Plg_system_httpheader');
-			if ($this->app->getUserState('plugins.system.httpheaders.global') === null)
-			{
-				$this->setGlobals();
-			}
-			$form->addFormPath(JPATH_PLUGINS . '/system/httpheader/forms');
-
-			$form->setField(new SimpleXMLElement('<fieldset name="httpheader"></fieldset>'));
+			$this->loadLanguage('plg_system_httpheader');
+			$form->setField(new SimpleXMLElement('<fieldset name="httpheader"></fieldset>'), 'params');
 			$form->setField(
 				new SimpleXMLElement(
-					'<field name="default_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/httpheader.xml"/>'
+					'<field name="xframeoptions_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/xframeoptions.xml"/>'
 				),
-			 null, true, 'httpheader');
+				null, false, 'httpheader');
 			$form->setField(
 				new SimpleXMLElement(
-					'<field name="hsts_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/hsts.xml"/>'
+					'<field name="contentsecuritypolicy_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/contentsecuritypolicy.xml"/>'
 				),
-			 null, true, 'httpheader');
-		}
-		*/
-
-		if ($form->getName() == 'com_plugins.plugin' && !empty($data))
-		{
-			if ($this->_name != $data->get('element', null))
-			{
-				return;
-			}
-			$test = $this->app->getUserState('plugins.system.httpheaders.global');
-		}
-	}
-
-	public function onContentPrepareData($form, $data)
-	{
-		if ($form == 'com_plugins.plugin')
-		{
-			if ((string) $data->name == 'plg_system_httpheader')
-			{
-				$this->app->setUserState('plugins.system.httpheaders.global', null);
-
-				if (!empty($data->params))
-				{
-					$params = new JRegistry($data->params);
-					$params = $params->toObject();
-					$this->setGlobals($params);
-				}
-				else
-				{
-					$this->setGlobals();
-				}
-
-			}
+				null, false, 'httpheader');
+			$form->setField(
+				new SimpleXMLElement(
+					'<field name="additional_httpheader_subform" type="subform" label="" formsource="/plugins/system/httpheader/forms/additionalhttpheader.xml"/>'
+				),
+				null, false, 'httpheader');
 		}
 	}
 
 	/**
-	 * @todo Description
+	 * Listener for the `onContentPrepareData` event
 	 *
-	 * @param   object  $data
-	 *
-	 * @return   void
-	 * @since    1.0
-	 */
-	private function setGlobals($data = null)
-	{
-		if ($data === null)
-		{
-			$data = $this->params->toObject();
-		}
-
-		foreach ($data as $key => $values)
-		{
-			$form = stristr($key,'_', true);
-			$this->app->setUserState('plugins.system.httpheaders.global.' . $form, $values);
-		}
-	}
-
-	/**
-	 * Listener for the `onAfterInitialise` event
+	 * @param   string  $form  The context for the data
+	 * @param   object  $data  An object containing the data for the form.
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0
 	 */
-	public function onAfterInitialise()
+	public function onContentPrepareData($form, $data)
 	{
-		$this->setDefaultHeader();
-
-		// Handle CSP
-		$cspOptions = $this->params->get('contentsecuritypolicy', 0);
-
-		if ($cspOptions)
+		if ($form == 'com_menus.item')
 		{
-			$this->setCspHeader();
+			$globals = $this->app->getUserState('plugins.system.httpheaders');
+			$new = false;
+			$newData = array();
+
+			if (!isset($data['params']['xframeoptions_subform']) && !empty($globals))
+			{
+				$newData['params']['xframeoptions_subform'] = json_encode(
+					$this->app->getUserState('plugins.system.httpheaders.xframeoptions_subform')
+				);
+
+				$new = true;
+			}
+
+			if (!isset($data['params']['contentsecuritypolicy_subform']) && !empty($globals))
+			{
+				$newData['params']['contentsecuritypolicy_subform'] = json_encode(
+					$this->app->getUserState('plugins.system.httpheaders.contentsecuritypolicy_subform')
+				);
+				$new = true;
+			}
+
+			if (!isset($data['params']['additional_httpheader_subform']) && !empty($globals))
+			{
+				$newData['params']['additional_httpheader_subform'] = json_encode(
+					$this->app->getUserState('plugins.system.httpheaders.additional_httpheader_subform')
+				);
+				$new = true;
+			}
+
+			if ($new)
+			{
+				$_form = Form::getInstance($form);
+				$_form->bind($newData);
+			}
 		}
 
-		// Handle HSTS
-		$hstsOptions = $this->params->get('hsts', 0);
-
-		if ($hstsOptions)
+		if ($form == 'com_plugins.plugin')
 		{
-			$this->setHstsHeader();
+			if ((string) $data->name == 'plg_system_httpheader')
+			{
+				if (isset($data->params['hsts_subform']) && (int) $data->params['save_note_handler'] === 1)
+				{
+					$data->params['save_note_handler'] = 0;
+					$this->setDefaultValues($data->params);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Set Plugin params global
+	 *
+	 * @param   array  $data
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setDefaultValues($data = array())
+	{
+		if (empty($data))
+		{
+			$data = $this->params->toArray();
 		}
 
-		// Handle the additional httpheader
-		$httpHeaders = $this->params->get('additional_httpheader', array());
+		$this->app->setUserState('plugins.system.httpheaders', null);
 
-		foreach ($httpHeaders as $httpHeader)
+		foreach ($data as $key => $values)
 		{
-			// Handle the client settings foreach header
-			if (!$this->app->isClient($httpHeader->client) && $httpHeader->client != 'both')
+			$this->app->setUserState('plugins.system.httpheaders.' . $key, $values);
+		}
+	}
+
+	/**
+	 * Listener for the `onBeforeCompileHead` event
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	public function onBeforeCompileHead()
+	{
+		$this->setDefaultValues();
+
+		$globals = (array) $this->app->getUserState('plugins.system.httpheaders');
+
+		if ($this->app->isClient('site'))
+		{
+			$menuParams = $this->app->getMenu()->getActive()->getParams()->toArray();
+
+			if (isset($menuParams['xframeoptions_subform']))
+			{
+				$globals['xframeoptions_subform'] = $menuParams['xframeoptions_subform'];
+			}
+
+			if (isset($menuParams['contentsecuritypolicy_subform']))
+			{
+				$globals['contentsecuritypolicy_subform'] = $menuParams['contentsecuritypolicy_subform'];
+			}
+
+			if (isset($menuParams['additionalhttpheader_subform']))
+			{
+				$globals['additionalhttpheader_subform'] = $menuParams['additionalhttpheader_subform'];
+			}
+		}
+
+		foreach ($globals as $globalKey => $globalValue)
+		{
+			if ($globalKey == 'save_note_handler')
 			{
 				continue;
 			}
 
-			if (in_array($httpHeader->key, $this->supportedHttpHeaders))
+			$class = 'set' . ucfirst(stristr($globalKey, '_', true)) . 'Header';
+
+			$this->{$class}($globalValue);
+		}
+	}
+
+	/**
+	 * Listener for the `onAfterDispatch` event
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	public function onAfterDispatch()
+	{
+		$this->onBeforeCompileHead();
+	}
+
+	/**
+	 * Listener for the `onAfterInitialise` event
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	public function onAfterInitialise()
+	{
+		if ($this->app->isClient('administrator'))
+		{
+			// Clear globals after save plugin
+			if ($this->app->input->get('option', null) == 'com_plugins'
+				&& $this->app->input->getInt('extension_id') === $this->id)
 			{
-				$this->app->setHeader($httpHeader->key, $httpHeader->value);
+				if (in_array($this->app->input->get('task', null), array('plugin.save', 'plugin.apply')))
+				{
+					$this->app->setUserState('plugins.system.httpheaders', null);
+				}
 			}
 		}
 	}
@@ -188,100 +289,245 @@ class PlgSystemHttpHeader extends CMSPlugin
 	/**
 	 * Set the HSTS header when enabled
 	 *
-	 * @return  void
+	 * @param   array  $options
+	 *
+	 * @return   void
 	 *
 	 * @since   1.0
 	 */
-	private function setHstsHeader()
+	private function setHstsHeader($options)
 	{
-		$maxAge        = (int) $this->params->get('hsts_maxage', 300);
-		$hstsOptions   = array();
-		$hstsOptions[] = $maxAge <= 300 ? 'max-age: 10' : 'max-age: ' . $maxAge;
+		extract($options);
 
-		if ($this->params->get('hsts_subdomains', 0))
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $hsts
+		 * @var   string  $hsts_maxage
+		 * @var   string  $hsts_subdomains
+		 * @var   string  $hsts_preload
+		 */
+
+		if ($hsts != '0')
 		{
-			$hstsOptions[] = 'includeSubDomains';
-		}
+			$hstsOptions   = array();
+			$hstsOptions[] = (int) $hsts_maxage <= 300 ? 'max-age: 300' : 'max-age: ' . $hsts_maxage;
 
-		if ($this->params->get('hsts_subdomaihsts_preloadns', 0))
-		{
-			$hstsOptions[] = 'preload';
-		}
-
-		$this->app->setHeader('Strict-Transport-Security', implode('; ', $hstsOptions));
-	}
-
-	/**
-	 * Set the default headers when enabled
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0
-	 */
-	private function setDefaultHeader()
-	{
-		// X-Frame-Options
-		$xFrameOptions = $this->params->get('xframeoptions', 1);
-
-		if ($xFrameOptions)
-		{
-			$this->app->setHeader('X-Frame-Options', 'SAMEORIGIN');
-		}
-
-		// X-XSS-Protection
-		$xXssProtection = $this->params->get('xxssprotection', 1);
-
-		if ($xXssProtection)
-		{
-			$this->app->setHeader('X-XSS-Protection', '1; mode=block');
-		}
-
-		// X-Content-Type-Options
-		$xContentTypeOptions = $this->params->get('xcontenttypeoptions', 1);
-		
-		if ($xContentTypeOptions)
-		{
-			$this->app->setHeader('X-Content-Type-Options', 'nosniff');
-		}
-
-		// Referrer-Policy
-		$referrerpolicy = $this->params->get('referrerpolicy', 'no-referrer-when-downgrade');
-
-		if ($referrerpolicy !== 'disabled')
-		{
-			$this->app->setHeader('Referrer-Policy', $referrerpolicy);
-		}
-	}
-
-
-	/**
-	 * Set the CSP header when enabled
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0
-	 */
-	private function setCspHeader()
-	{
-		$cspValues    = $this->params->get('contentsecuritypolicy_values', array());
-		$cspReadOnly  = $this->params->get('contentsecuritypolicy_report_only', 0);
-		$csp          = $cspReadOnly == 0 ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
-		$newCspValues = array();
-
-		foreach ($cspValues as $cspValue)
-		{
-			// Handle the client settings foreach header
-			if (!$this->app->isClient($cspValue->client) && $cspValue->client != 'both')
+			if ($hsts_subdomains != '0')
 			{
-				continue;
+				$hstsOptions[] = 'includeSubDomains';
 			}
 
-			$newCspValues[] = trim($cspValue->key) . ': ' . trim($cspValue->value);
-		}
+			if ($hsts_preload != '0')
+			{
+				$hstsOptions[] = 'preload';
+			}
 
-		if (!empty($newCspValues))
+			$this->app->setHeader('Strict-Transport-Security', implode('; ', $hstsOptions), true);
+		}
+	}
+
+	/**
+	 * Set the X-Content-Type-Options headers when enabled
+	 *
+	 * @param   array  $options
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setXcontenttypeoptionsHeader($options)
+	{
+		extract($options);
+
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $xcontenttypeoptions
+		 */
+
+		if ($xcontenttypeoptions == '1')
 		{
-			$this->app->setHeader($csp, implode(';', $newCspValues));
+			$this->app->setHeader('X-Content-Type-Options', 'nosniff', true);
+		}
+	}
+
+	/**
+	 * Set the X-Frame-Options headers when enabled
+	 *
+	 * @param   array  $options
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setXframeoptionsHeader($options)
+	{
+		extract($options);
+
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $xframeoptions
+		 * @var   array   $xframeoptions_allowfrom
+		 */
+
+		$xframeoptions = Text::_($xframeoptions);
+
+		if ($xframeoptions != '0')
+		{
+			$value = $xframeoptions;
+
+			if ($xframeoptions == 'ALLOW-FROM')
+			{
+				$value = 'ALLOW-FROM ' . implode('; ', ArrayHelper::getColumn($xframeoptions_allowfrom, 'url'));
+			}
+
+			$this->app->setHeader('X-Frame-Options', $value, true);
+		}
+	}
+
+	/**
+	 * Set the Referrer-Policy headers when enabled
+	 *
+	 * @param   array  $options
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setReferrerpolicyHeader($options)
+	{
+		extract($options);
+
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $referrerpolicy
+		 */
+
+		$referrerpolicy = Text::_($referrerpolicy);
+
+		if ($referrerpolicy != '0')
+		{
+			$this->app->setHeader('Referrer-Policy', $referrerpolicy, true);
+		}
+	}
+
+	/**
+	 * Set the X-XSS-Protection headers when enabled
+	 *
+	 * @param   array  $options
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setXxssprotectionHeader($options)
+	{
+		extract($options);
+
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $xxssprotection
+		 * @var   string  $xxssprotection_block
+		 */
+
+		if ($xxssprotection == '1')
+		{
+			$blockMode = $xxssprotection_block == '1' ? '; mode=block' : '';
+			$this->app->setHeader('X-XSS-Protection', '1' . $blockMode, true);
+		}
+	}
+
+	/**
+	 * Set the additional headers when enabled
+	 *
+	 * @param   array  $options
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setAdditionalHeader($options)
+	{
+		extract($options);
+
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $additional_httpheader
+		 * @var   array   $additional_httpheader_values
+		 */
+
+		if ($additional_httpheader != '0')
+		{
+			foreach ($additional_httpheader_values as $httpHeader)
+			{
+				// Handle the client settings foreach header
+				if (!$this->app->isClient($httpHeader['client']) && $httpHeader['client'] != 'both'
+					|| empty($httpHeader['key'])
+					|| empty($httpHeader['value']))
+				{
+					continue;
+				}
+
+				// @todo Set a group of allowed HTTP-Headers an validate
+				/*
+				 * if (in_array($httpHeader['key'], $this->supportedHttpHeaders))
+				 * {
+				 *      $this->app->setHeader($httpHeader['key'], $httpHeader['value']);
+				 * }
+				*/
+				$this->app->setHeader($httpHeader['key'], $httpHeader['value'], true);
+			}
+		}
+	}
+
+	/**
+	 * Set the Content-Security-Policy header when enabled
+	 *
+	 * @param   array  $options
+	 *
+	 * @return   void
+	 *
+	 * @since   1.0
+	 */
+	private function setContentsecuritypolicyHeader($options)
+	{
+		extract($options);
+
+		/**
+		 * Variables
+		 * -----------------
+		 * @var   string  $contentsecuritypolicy
+		 * @var   string  $contentsecuritypolicy_report_only
+		 * @var   array   $contentsecuritypolicy_values
+		 */
+
+		if ($contentsecuritypolicy != '0')
+		{
+			$csp          = $contentsecuritypolicy_report_only == '0' ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
+			$newCspValues = array();
+
+			foreach ($contentsecuritypolicy_values as $cspValue)
+			{
+				// Handle the client settings foreach header
+				if (!$this->app->isClient($cspValue['client']) && $cspValue['client'] != 'both'
+					|| empty(trim($cspValue['key']))
+					|| empty(trim($cspValue['value'])))
+				{
+					continue;
+				}
+
+				$newCspValues[] = trim($cspValue['key']) . ': ' . trim($cspValue['value']);
+			}
+
+			if (!empty($newCspValues))
+			{
+				$this->app->setHeader($csp, implode('; ', $newCspValues), true);
+			}
 		}
 	}
 }
