@@ -311,7 +311,7 @@ class PlgSystemHttpHeader extends CMSPlugin
 		if ($hsts != '0')
 		{
 			$hstsOptions   = array();
-			$hstsOptions[] = (int) $hsts_maxage <= 300 ? 'max-age: 300' : 'max-age: ' . $hsts_maxage;
+			$hstsOptions[] = (int) $hsts_maxage <= 300 ? 'max-age=300' : 'max-age=' . $hsts_maxage;
 
 			if ($hsts_subdomains != '0')
 			{
